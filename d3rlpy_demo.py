@@ -66,7 +66,7 @@ def train_model_bc():
 def train_model_iql():
     dataset, env=get_minari('kitchen-mixed-v1')
     encoder=VectorEncoderFactory([256,256])
-    iql=algos.IQLConfig(batch_size=256,
+    iql=algos.IQLConfig(batch_size=4096,
                         weight_temp=0.5,
                         actor_encoder_factory=encoder,
                         critic_encoder_factory=encoder).create(device="cuda:0")
@@ -81,7 +81,7 @@ def train_model_iql():
             evaluators={'td_error':td_error_evaluator,'environment':env_evaluator,'value_estimation':value_evaluator},
             logger_adapter=logger_adapter
             )
-    iql.save('d3rlpy_test/model/iql_kitchen_mixed_2ksteps_256batch_0.5temp.d3')   
+    iql.save('d3rlpy_test/model/iql_kitchen_mixed_2ksteps_4096batch_0.5temp.d3')   
     
 def test_gymnasiusm_robot():
     gymnasium.register_envs(gymnasium_robotics)
