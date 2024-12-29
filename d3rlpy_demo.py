@@ -1,5 +1,3 @@
-from ast import arg
-from email import parser
 from tkinter import N
 from d3rlpy.datasets import get_minari
 from d3rlpy import algos
@@ -32,12 +30,12 @@ def parse_args():
         help='Choose algorithm (default: iql)'
     )
     parser.add_argument(
-        '--enviroment',
+        '--environment',
         type=str,
         default='kitchen-mixed-v1',
         choices=['kitchen-mixed-v1', 'kitchen-complete-v1',
                  'hopper-medium-v0', 'hopper-expert-v0'],
-        help='Choose enviroment (default: kitchen-mixed-v1)'
+        help='Choose environment (default: kitchen-mixed-v1)'
     )
     parser.add_argument(
         '--model_path',
@@ -45,12 +43,13 @@ def parse_args():
         default=None,
         help='Path to the saved model'
     )
+    return parser.parse_args()
 
 
 def train_model(args):
     # data=minari.load_dataset('kitchen-complete-v1')
     # dataset, env=get_d4rl('hopper-medium-v0')
-    env_name = args.enviroment
+    env_name = args.environment
     dataset, env = get_minari(env_name)
 
     # define evaluators
@@ -130,7 +129,7 @@ def test_gymnasiusm_robot():
 
 
 def evaluate_model(args, model):
-    if args.enviroment == 'kitchen-mixed-v1':
+    if args.environment == 'kitchen-mixed-v1':
         gymnasium.register_envs(gymnasium_robotics)
         env = gymnasium.make('FrankaKitchen-v1', render_mode='human',
                              tasks_to_complete=['microwave', 'kettle', 'bottom burner', 'light switch'])
@@ -170,7 +169,7 @@ def evaluate_model(args, model):
                 if terminated or truncated:
                     break
         env.close()
-    elif args.enviroment == 'hopper-medium-v0' or args.enviroment == 'hopper-expert-v0':
+    elif args.environment == 'hopper-medium-v0' or args.environment == 'hopper-expert-v0':
         env = gym.make('Hopper-v3', render_mode='human')
         obs, _ = env.reset()
         obs = np.expand_dims(obs, axis=0)
@@ -186,6 +185,7 @@ def evaluate_model(args, model):
 
 def main():
     args = parse_args()
+    print(args)
     if args.mode == 'train':
         train_model(args)
     elif args.mode == 'test_env':
