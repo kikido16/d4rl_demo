@@ -26,4 +26,8 @@ python d3rlpy_demo.py --mode=evaluate --environment=kitchen-mixed-v1 --model_pat
 ### Trained results
 
 #### Hopper
+orange curve: Hopper-expert-v0, conservative weight=5.0, Encoder=[256, 256, 256]
+red curve: Hopper-medium-v0, conservative weight=10.0, Encoder=[256, 256, 256]
+blue curve: Hopper-medium-v0, conservative weight=10.0, NoEncoder
+black curve: Hopper-medium-v0, conservative weight=5.0, Encoder=[256, 256, 256]
 ![image](https://github.com/kikido16/d4rl_demo/blob/master/visualization/Hopper.png)
