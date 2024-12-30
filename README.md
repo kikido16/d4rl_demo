@@ -36,4 +36,5 @@ black curve: Hopper-medium-v0, conservative weight=5.0, Encoder=[256, 256, 256]
 ![image](https://github.com/kikido16/d4rl_demo/blob/master/visualization/Hopper.png)
 
 evaluation video:
+
 ![image](https://github.com/kikido16/d4rl_demo/blob/master/video/hopper_test.mp4/rl-video-episode-0.gif)
