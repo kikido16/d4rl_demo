@@ -1,4 +1,5 @@
 from tkinter import N
+from xml.sax import default_parser_list
 from d3rlpy.datasets import get_minari
 from d3rlpy import algos
 from d3rlpy import metrics
@@ -23,7 +24,7 @@ def parse_args():
         help='Offline training or evaluation (default: train)'
     )
     parser.add_argument(
-        '--choose_algorithm',
+        '--algorithm',
         type=str,
         default='iql',
         choices=['cql', 'bc', 'iql'],
@@ -34,7 +35,8 @@ def parse_args():
         type=str,
         default='kitchen-mixed-v1',
         choices=['kitchen-mixed-v1', 'kitchen-complete-v1',
-                 'hopper-medium-v0', 'hopper-expert-v0'],
+                 'hopper-medium-v0', 'hopper-expert-v0',
+                 'D4RL/kitchen/complete-v2'],
         help='Choose environment (default: kitchen-mixed-v1)'
     )
     parser.add_argument(
@@ -60,14 +62,14 @@ def train_model(args):
         episodes=dataset.episodes)
 
     # define logger
-    logger_adapter = logging.CombineAdapterFactory([logging.FileAdapterFactory(root_dir='d3rlpy_test/d3rlpy_logs'),
-                                                    logging.TensorboardAdapterFactory(root_dir='d3rlpy_test/tensorboard_logs')])
+    logger_adapter = logging.CombineAdapterFactory([logging.FileAdapterFactory(root_dir='d3rlpy_logs'),
+                                                    logging.TensorboardAdapterFactory(root_dir='tensorboard_logs')])
 
     # define default encoder
-    encoder = VectorEncoderFactory([512, 512, 512])
+    encoder = VectorEncoderFactory([256,256])
 
     # define algorithms
-    if args.choose_algorithm == 'cql':
+    if args.algorithm == 'cql':
         cql = algos.CQLConfig(actor_learning_rate=5e-5,
                               critic_learning_rate=5e-5,
                               temp_learning_rate=3e-5,
@@ -87,18 +89,18 @@ def train_model(args):
                 logger_adapter=logger_adapter
                 )
         cql.save('d3rlpy_test/cql_kitchen_mixed_noalpha.d3')
-    elif args.choose_algorithm == 'bc':
+    elif args.algorithm == 'bc':
         bc = algos.BCConfig(learning_rate=1e-4,
                             encoder_factory=encoder,
                             batch_size=256).create(device="cuda:0")
         bc.fit(dataset, n_steps=int(5e5),
                n_steps_per_epoch=1000,
-               save_interval=50,
+               save_interval=100,
                evaluators={'environment': env_evaluator},
                logger_adapter=logger_adapter
                )
-        bc.save('d3rlpy_test/bc_kitchen_complete.d3')
-    elif args.choose_algorithm == 'iql':
+        bc.save('bc_kitchen_complete.d3')
+    elif args.algorithm == 'iql':
         iql_encoder = VectorEncoderFactory([256, 256], dropout_rate=0.1)
         iql = algos.IQLConfig(batch_size=256,
                               weight_temp=0.5,
@@ -133,32 +135,38 @@ def evaluate_model(args, model):
         gymnasium.register_envs(gymnasium_robotics)
         env = gymnasium.make('FrankaKitchen-v1', render_mode='human',
                              tasks_to_complete=['microwave', 'kettle', 'bottom burner', 'light switch'])
+        # env = gymnasium.make('FrankaKitchen-v1',
+        #                      tasks_to_complete=['microwave', 'kettle', 'bottom burner', 'light switch'])
         n_trials = 1
+        total_reward = 0
         for _ in range(n_trials):
             obs, _ = env.reset()
+            print(obs)
 
             obs_basic = obs['observation']
-            obs_microwave = obs['achieved_goal']['microwave']
-            obs_kettle = obs['achieved_goal']['kettle']
-            obs_bottomburner = obs['achieved_goal']['bottom burner']
-            obs_lightswitch = obs['achieved_goal']['light switch']
+            obs_microwave = obs['desired_goal']['microwave']
+            obs_kettle = obs['desired_goal']['kettle']
+            obs_bottomburner = obs['desired_goal']['bottom burner']
+            obs_lightswitch = obs['desired_goal']['light switch']
             # obs_slidecabinet=obs['achieved_goal']['slide cabinet']
             obs = np.concatenate((obs_basic, obs_bottomburner,
-                                  obs_kettle, obs_lightswitch, obs_microwave))
+                                   obs_kettle, obs_lightswitch, obs_microwave))
             obs = np.expand_dims(obs, axis=0)
-            # print(obs)
+            print(obs)
             while True:
+                episode_reward=0
                 action = model.predict(obs)[0]
                 # print('act: ',action)
                 # assert action.shape == (1,9)
                 # action=np.squeeze(action)
                 # print('act: ',action)
                 obs, reward, terminated, truncated, _ = env.step(action)
+                episode_reward += reward
                 obs_basic = obs['observation']
-                obs_microwave = obs['achieved_goal']['microwave']
-                obs_kettle = obs['achieved_goal']['kettle']
-                obs_bottomburner = obs['achieved_goal']['bottom burner']
-                obs_lightswitch = obs['achieved_goal']['light switch']
+                # obs_microwave = obs['achieved_goal']['microwave']
+                # obs_kettle = obs['achieved_goal']['kettle']
+                # obs_bottomburner = obs['achieved_goal']['bottom burner']
+                # obs_lightswitch = obs['achieved_goal']['light switch']
                 # obs_slidecabinet=obs['achieved_goal']['slide cabinet']
                 obs = np.concatenate(
                     (obs_basic, obs_bottomburner, obs_kettle, obs_lightswitch, obs_microwave))
@@ -168,6 +176,10 @@ def evaluate_model(args, model):
                 env.render()
                 if terminated or truncated:
                     break
+            total_reward += episode_reward
+            print('Episode reward:', episode_reward)
+        total_reward /= n_trials
+        print('Average reward:', total_reward)
         env.close()
     elif args.environment == 'hopper-medium-v0' or args.environment == 'hopper-expert-v0':
         env = gym.make('Hopper-v3', render_mode='human')
@@ -193,7 +205,14 @@ def main():
     elif args.mode == 'evaluate':
         model = load_learnable(args.model_path)
         evaluate_model(args, model)
-    # iql=load_learnable('/home/zxr/lxy/d4rl/d3rlpy_test/model/iql_kitchen_mixed.d3')
+    # dataset, env=get_minari('kitchen-complete-v1')
+    # np.set_printoptions(precision=3, suppress=True)
+    # print(dataset.episodes[0].observations[300])
+    # print(dataset.episodes[0].rewards[300])
+    # print(dataset.episodes[0].observations[250])
+    # print(dataset.episodes[0].rewards[250])
+    # iql = load_learnable(
+    #     '/home/zxr/lxy/d4rl/d3rlpy_test/d3rlpy_logs/iql_kitchen_complete_200steps_256batch_0.5temp/model_200000.d3')
     # ans=metrics.evaluate_qlearning_with_environment(iql,env)
     # print(ans)
     # test_kitchen_model(iql)
