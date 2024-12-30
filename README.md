@@ -1,5 +1,8 @@
 # d4rl test of Hopper and Kitchen using d3rlpy
 ## How to run the code
+Dependencies:
+- d3rlpy-2.6.0
+
 ### Train
 Train mujoco model
 ```
