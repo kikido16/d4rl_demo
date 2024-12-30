@@ -22,3 +22,8 @@ Evaluate kitchen model
 ```
 python d3rlpy_demo.py --mode=evaluate --environment=kitchen-mixed-v1 --model_path=./model/iql_kitchen_mixed_2ksteps_512batch_3.0temp.d3
 ```
+
+### Trained results
+
+#### Hopper
+![image](https://github.com/kikido16/d4rl_demo/blob/master/visualization/Hopper.png)
