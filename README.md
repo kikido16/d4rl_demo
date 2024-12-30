@@ -8,6 +8,7 @@ python d3rlpy_demo.py --mode=train --environment=hopper-medium-v0 --algorithm=cq
 Train kitchen model
 ```
 python d3rlpy_demo.py --mode=train --environment=kitchen-mixed-v0 --algorithm=iql
+```
 
 ### Evaluation
 Evaluate mujoco model
