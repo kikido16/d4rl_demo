@@ -66,7 +66,7 @@ def train_model(args):
                                                     logging.TensorboardAdapterFactory(root_dir='tensorboard_logs')])
 
     # define default encoder
-    encoder = VectorEncoderFactory([256,256])
+    encoder = VectorEncoderFactory([256,256],dropout_rate=0.1)
 
     # define algorithms
     if args.algorithm == 'cql':
@@ -90,16 +90,16 @@ def train_model(args):
                 )
         cql.save('d3rlpy_test/cql_kitchen_mixed_noalpha.d3')
     elif args.algorithm == 'bc':
-        bc = algos.BCConfig(learning_rate=1e-4,
+        bc = algos.BCConfig(learning_rate=1e-3,
                             encoder_factory=encoder,
-                            batch_size=256).create(device="cuda:0")
-        bc.fit(dataset, n_steps=int(5e5),
-               n_steps_per_epoch=1000,
-               save_interval=100,
+                            batch_size=128).create(device="cuda:0")
+        bc.fit(dataset, n_steps=int(1e6),
+               n_steps_per_epoch=2000,
+               save_interval=50,
                evaluators={'environment': env_evaluator},
                logger_adapter=logger_adapter
                )
-        bc.save('bc_kitchen_complete.d3')
+        bc.save('model/bc_kitchen_complete_1e-3lrate_128batch_2ksteps.d3')
     elif args.algorithm == 'iql':
         iql_encoder = VectorEncoderFactory([256, 256], dropout_rate=0.1)
         iql = algos.IQLConfig(batch_size=256,
