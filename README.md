@@ -13,6 +13,10 @@ Train kitchen model
 python d3rlpy_demo.py --mode=train --environment=kitchen-mixed-v1 --algorithm=iql
 ```
 
+```
+python d3rlpy_demo.py --mode=train --environment=D4RL/kitchen/complete-v2 --algorithm=bc
+```
+
 ### Evaluation
 Evaluate mujoco model
 ```
@@ -21,6 +25,11 @@ python d3rlpy_demo.py --mode=evaluate --environment=hopper-medium-v0 --model_pat
 Evaluate kitchen model
 ```
 python d3rlpy_demo.py --mode=evaluate --environment=kitchen-mixed-v1 --model_path=./model/iql_kitchen_mixed_2ksteps_512batch_3.0temp.d3
+```
+
+```
+python d3rlpy_demo.py --mode=evaluate --environment=kitchen-complete-v1 --model_path=./model/bc_kitchen_complete_1e-3lrate_128batch_2ksteps.d3
+
 ```
 
 ### Trained results
