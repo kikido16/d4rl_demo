@@ -47,3 +47,16 @@ black curve: Hopper-medium-v0, conservative weight=5.0, Encoder=[256, 256, 256]
 evaluation video:
 
 ![image](https://github.com/kikido16/d4rl_demo/blob/master/video/hopper_test.mp4/rl-video-episode-0.gif)
+
+#### Kitchen
+kitchen-mixed-v0, IQL
+
+orange curve: batch_size=1024, Inverse temperature=3.0, Encoder=[512, 512, 512]
+
+green curve: batch_size=512, Inverse temperature=3.0, Encoder=[512, 512, 512]
+
+pink curve: batch_size=256, Inverse temperature=0.5, Encoder=[256, 256]
+
+black curve: batch_size=4096, Inverse temperature=0.5, Encoder=[256, 256]
+
+![image](https://github.com/kikido16/d4rl_demo/blob/master/visualization/kitchen_mixed_iql.png)
