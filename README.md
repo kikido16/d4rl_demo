@@ -60,3 +60,11 @@ pink curve: batch_size=256, Inverse temperature=0.5, Encoder=[256, 256]
 black curve: batch_size=4096, Inverse temperature=0.5, Encoder=[256, 256]
 
 ![image](https://github.com/kikido16/d4rl_demo/blob/master/visualization/kitchen_mixed_iql.png)
+
+kitchen-complete-v0, BC
+
+orange curve: learning rate=3e-5, batch_size=256, Encoder=[512, 512, 512]
+
+green curve: learning rate=1e-4, batch_size=512, Encoder=[256, 256]
+
+![image](https://github.com/kikido16/d4rl_demo/blob/master/visualization/kitchen_complete_bc.png)
